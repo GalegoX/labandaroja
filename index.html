@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0c2033">
+<meta name="description" content="Radar petrolero: ¿está de franco o está en el campo? Diagrama de turnos en Manantiales Behr, Comodoro Rivadavia.">
+<title>¿Franco o campo? — Radar petrolero</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛢️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#071120;          /* noche patagónica */
+    --bg2:#0c2033;
+    --bg3:#123047;
+    --panel:rgba(13,31,48,.74);
+    --panel2:rgba(13,31,48,.5);
+    --linea:rgba(214,232,247,.10);
+    --txt:#eaf3fa;
+    --muted:#93aec3;
+    --silueta:#0b2033;      /* fierros del yacimiento */
+    --nieve:#dfe9f2;
+    --franco:#3ddc97;
+    --dia:#ffc857;
+    --tarde:#ff8a3d;
+    --noche:#a08bff;
+    --trabaja:#6f8ea6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Archivo',system-ui,-apple-system,sans-serif;
+    color:var(--txt);
+    background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 46%,var(--bg3) 100%);
+    min-height:100vh;
+  }
+  ::selection{background:var(--tarde);color:#241000}
+
+  /* ============ HÉROE / ESCENA ============ */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:46px 20px 330px;
+    text-align:center;
+  }
+  @media(max-width:640px){ .hero{padding-bottom:238px} }
+  .luna{
+    position:absolute;top:38px;right:9%;
+    width:70px;height:70px;border-radius:50%;
+    background:#f4f8fc;opacity:.92;z-index:0;
+    box-shadow:0 0 38px 12px rgba(228,241,252,.32),0 0 90px 34px rgba(188,219,244,.14);
+  }
+  .hero-int{position:relative;z-index:5;max-width:860px;margin:0 auto}
+  h1{
+    font-family:'Saira Condensed',sans-serif;
+    font-weight:800;
+    font-size:clamp(2.7rem,9vw,4.4rem);
+    letter-spacing:.04em;
+    line-height:.95;
+    text-transform:uppercase;
+    text-shadow:0 3px 22px rgba(0,0,0,.5);
+  }
+  h1 .fr{color:var(--franco)}
+  h1 .ca{color:var(--tarde)}
+  .sub{margin-top:12px;color:var(--muted);font-size:clamp(.95rem,2.6vw,1.12rem)}
+  .sub b{color:var(--txt);font-weight:600}
+  .chips-hero{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .mini-chip{
+    font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;
+    padding:6px 12px;border:1px solid var(--linea);border-radius:999px;
+    background:rgba(8,20,32,.55);color:var(--muted);
+  }
+  .mini-chip b{color:var(--txt);font-weight:600}
+
+  /* capas del paisaje */
+  .lomas,.figuras,.suelo{position:absolute;left:0;pointer-events:none}
+  .lomas{bottom:44px;width:100%;height:150px;z-index:1}
+  .figuras{
+    bottom:88px;left:50%;transform:translateX(-50%);
+    width:min(92vw,640px);height:auto;z-index:2;
+  }
+  .suelo{bottom:-2px;width:100%;height:112px;z-index:3}
+  .hero::after{ /* fundido de la nieve hacia la noche del contenido */
+    content:"";position:absolute;left:0;right:0;bottom:0;height:64px;z-index:4;
+    background:linear-gradient(180deg,rgba(12,32,51,0),rgba(12,32,51,.88) 85%,var(--bg2));
+  }
+  .baliza{animation:latir 1.6s ease-in-out infinite}
+  @keyframes latir{0%,100%{opacity:.25}50%{opacity:1}}
+
+  /* ============ NIEVE (con viento de Comodoro) ============ */
+  #nieve{position:fixed;inset:0;pointer-events:none;z-index:7;overflow:hidden}
+  .copo{position:absolute;top:-6vh;border-radius:50%;background:#fff;animation:caer linear infinite}
+  @keyframes caer{to{transform:translate3d(24vw,112vh,0)}}
+
+  /* ============ CONTENIDO ============ */
+  main{
+    position:relative;z-index:5;
+    max-width:1000px;margin:0 auto;
+    padding:30px 18px 64px;
+    display:flex;flex-direction:column;gap:24px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--linea);
+    border-radius:16px;
+    padding:22px;
+    backdrop-filter:blur(6px);
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  .card h2{
+    font-family:'Saira Condensed',sans-serif;font-weight:600;
+    font-size:.84rem;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:12px;
+  }
+  .dosc{display:grid;grid-template-columns:1fr;gap:22px}
+  @media(min-width:780px){.dosc{grid-template-columns:1.15fr 1fr}}
+
+  /* HOY */
+  .fecha-hoy{color:var(--muted);font-size:1rem;margin-bottom:8px}
+  .fecha-hoy::first-letter{text-transform:uppercase}
+  .estado-big{
+    font-family:'Saira Condensed',sans-serif;font-weight:800;
+    font-size:clamp(2rem,6.5vw,2.9rem);letter-spacing:.03em;line-height:1;
+    display:flex;align-items:center;gap:12px;
+  }
+  .estado-big .em{font-size:.82em;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+  .c-franco{color:var(--franco)} .c-dia{color:var(--dia)} .c-tarde{color:var(--tarde)}
+  .c-noche{color:var(--noche)} .c-trabaja{color:var(--trabaja)}
+  .frase{margin-top:10px;font-size:1.02rem;line-height:1.55;opacity:.93}
+  .linea-dato{
+    margin-top:14px;padding-top:12px;border-top:1px dashed var(--linea);
+    color:var(--muted);font-size:.95rem;display:flex;flex-direction:column;gap:6px;
+  }
+  .linea-dato b{color:var(--txt)}
+
+  /* SÁBADO */
+  .pregunta{font-size:1.05rem;line-height:1.4;margin-bottom:10px}
+  .pregunta b{color:var(--txt)}
+  .veredicto{
+    font-family:'Saira Condensed',sans-serif;font-weight:800;
+    font-size:clamp(2.4rem,8vw,3.4rem);line-height:1;letter-spacing:.02em;
+  }
+
+  /* TIRA PRÓXIMOS DÍAS */
+  .tira{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x proximity}
+  .chip-dia{
+    scroll-snap-align:start;flex:0 0 auto;min-width:88px;
+    border:1px solid var(--linea);background:var(--panel2);
+    border-radius:14px;padding:10px 8px 9px;text-align:center;
+  }
+  .chip-dia .d{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .chip-dia .n{font-family:'Saira Condensed',sans-serif;font-size:1.5rem;font-weight:700;margin:2px 0 7px}
+  .chip-dia.hoy-chip{outline:2px solid rgba(234,243,250,.75);outline-offset:2px}
+
+  /* pastillas de estado */
+  .pill{
+    display:inline-block;font-size:.68rem;font-weight:700;
+    letter-spacing:.05em;text-transform:uppercase;
+    border-radius:999px;padding:3px 9px;white-space:nowrap;
+    border:1.5px solid transparent;
+  }
+  .p-franco{background:var(--franco);color:#052b1b}
+  .p-dia{background:var(--dia);color:#3a2a00}
+  .p-tarde{background:var(--tarde);color:#3d1c00}
+  .p-noche{background:var(--noche);color:#1d1440}
+  .p-trabaja{background:var(--trabaja);color:#0b2033}
+  .pill.estim{background:transparent}
+  .p-franco.estim{color:var(--franco);border-color:var(--franco);border-style:dashed}
+  .p-dia.estim{color:var(--dia);border-color:var(--dia);border-style:dashed}
+  .p-tarde.estim{color:var(--tarde);border-color:var(--tarde);border-style:dashed}
+  .p-noche.estim{color:var(--noche);border-color:var(--noche);border-style:dashed}
+  .p-trabaja.estim{color:var(--trabaja);border-color:var(--trabaja);border-style:dashed}
+
+  /* CALENDARIO */
+  .cal-cab{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+  .cal-titulo{
+    font-family:'Saira Condensed',sans-serif;font-weight:700;
+    font-size:1.5rem;letter-spacing:.05em;text-transform:capitalize;
+  }
+  .cal-nav{display:flex;gap:8px}
+  .cal-nav button{
+    width:40px;height:40px;border-radius:10px;cursor:pointer;
+    border:1px solid var(--linea);background:var(--panel2);
+    color:var(--txt);font-size:1.15rem;line-height:1;
+  }
+  .cal-nav button:hover{background:rgba(255,255,255,.08)}
+  .cal-nav button:focus-visible{outline:2px solid var(--dia);outline-offset:2px}
+  .cal-sem{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
+  .cal-sem span{text-align:center;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .celda{
+    min-height:68px;border:1px solid var(--linea);background:var(--panel2);
+    border-radius:12px;padding:7px 5px 6px;
+    display:flex;flex-direction:column;justify-content:space-between;align-items:center;gap:4px;
+  }
+  .celda .num{font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:1.05rem;line-height:1}
+  .celda .pill{font-size:.6rem;padding:2px 7px}
+  .celda.fuera{opacity:.3}
+  .celda.es-hoy{border-color:rgba(234,243,250,.9);box-shadow:inset 0 0 0 1px rgba(234,243,250,.9)}
+  @media(max-width:480px){
+    .celda{min-height:56px;padding:5px 2px}
+    .celda .pill{font-size:.5rem;padding:2px 4px;letter-spacing:.02em}
+  }
+
+  /* LEYENDA Y NOTAS */
+  .leyenda-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px}
+  .ley-item{display:flex;gap:10px;align-items:flex-start;font-size:.92rem;color:var(--muted);line-height:1.45}
+  .ley-item .pill{margin-top:2px;flex:0 0 auto}
+  .ley-item b{color:var(--txt)}
+  .ley-nota{margin-top:14px;padding-top:12px;border-top:1px dashed var(--linea);font-size:.86rem;color:var(--muted);line-height:1.55}
+  .ley-nota b{color:var(--txt)}
+  .notas{color:var(--muted);font-size:.92rem;line-height:1.65;display:flex;flex-direction:column;gap:12px}
+  .notas b{color:var(--txt)}
+  .firma{text-align:center;color:var(--muted);font-size:.8rem;opacity:.85}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important}
+    #nieve{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="nieve" aria-hidden="true"></div>
+
+<header class="hero">
+  <div class="luna" aria-hidden="true"></div>
+
+  <div class="hero-int">
+    <h1>¿<span class="fr">Franco</span> o <span class="ca">campo</span>?</h1>
+    <p class="sub">Radar petrolero de <b id="sub-nombre">…</b> · Manantiales Behr — Comodoro Rivadavia</p>
+    <div class="chips-hero">
+      <span class="mini-chip">Último parte: <b id="chip-parte">—</b></span>
+      <span class="mini-chip">🛻 La Hilux ya calentó</span>
+      <span class="mini-chip">💨 Viento: sí</span>
+    </div>
+  </div>
+
+  <!-- lomas lejanas -->
+  <svg class="lomas" viewBox="0 0 900 150" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0,96 C130,60 240,104 380,84 C520,64 610,110 730,88 C810,74 860,92 900,82 L900,150 L0,150 Z" fill="#14314b"/>
+  </svg>
+
+  <!-- fierros: cigüeña + Hilux + torre -->
+  <svg class="figuras" viewBox="0 0 640 210" aria-hidden="true">
+    <g fill="#0b2033">
+      <!-- CIGÜEÑA -->
+      <!-- boca de pozo y varilla -->
+      <rect x="26" y="186" width="16" height="24"/>
+      <rect x="32" y="128" width="4" height="60"/>
+      <!-- patín -->
+      <rect x="8" y="202" width="246" height="8" rx="2"/>
+      <!-- motor -->
+      <rect x="158" y="180" width="40" height="22" rx="4"/>
+      <!-- caballete -->
+      <polygon points="104,210 158,210 130,94"/>
+      <!-- cigüeñal con contrapesos (gira) -->
+      <g>
+        <rect x="203.5" y="142" width="9" height="48" rx="4"/>
+        <circle cx="208" cy="144" r="12"/>
+        <circle cx="208" cy="188" r="12"/>
+        <animateTransform attributeName="transform" type="rotate"
+          from="0 208 166" to="360 208 166" dur="6.4s" repeatCount="indefinite"/>
+      </g>
+      <!-- balancín + cabeza de caballo (cabecea) -->
+      <g>
+        <rect x="24" y="88" width="210" height="13" rx="4"/>
+        <path d="M 56,82 L 56,112 L 36,112 C 20,112 12,102 16,90 C 19,80 32,76 44,80 Z"/>
+        <rect x="204" y="96" width="8" height="66" rx="3"/>
+        <animateTransform attributeName="transform" type="rotate"
+          values="-8 130 96; 8 130 96; -8 130 96"
+          keyTimes="0; 0.5; 1"
+          calcMode="spline" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"
+          dur="6.4s" repeatCount="indefinite"/>
+      </g>
+      <!-- perno del balancín -->
+      <circle cx="130" cy="96" r="6"/>
+    </g>
+
+    <!-- LA HILUX -->
+    <g transform="translate(300,168)">
+      <path d="M42,14 L48,0 L70,0 L74,14 Z" fill="#e8f1f7" stroke="#0b2033" stroke-width="2"/>
+      <path d="M50,4 L67,4 L70,12 L47,12 Z" fill="#0b2033"/>
+      <rect x="0" y="14" width="74" height="16" rx="3" fill="#e8f1f7" stroke="#0b2033" stroke-width="2"/>
+      <circle cx="16" cy="32" r="7" fill="#0b2033"/>
+      <circle cx="58" cy="32" r="7" fill="#0b2033"/>
+      <circle cx="16" cy="32" r="2.5" fill="#dfe9f2"/>
+      <circle cx="58" cy="32" r="2.5" fill="#dfe9f2"/>
+    </g>
+
+    <!-- TORRE -->
+    <g transform="translate(510,44)" fill="none" stroke="#0b2033">
+      <path d="M0,166 L34,8 L46,8 L82,166" stroke-width="5"/>
+      <path d="M10,130 L72,130 M17,94 L65,94 M24,58 L58,58 M10,130 L65,94 M72,130 L17,94 M17,94 L58,58 M65,94 L24,58" stroke-width="3"/>
+      <rect x="28" y="2" width="26" height="10" fill="#0b2033" stroke="none"/>
+      <circle class="baliza" cx="41" cy="-2" r="4.5" fill="#ff5c5c" stroke="none"/>
+    </g>
+  </svg>
+
+  <!-- nieve del suelo (tapa las bases: nevó) -->
+  <svg class="suelo" viewBox="0 0 900 110" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0,26 C110,10 230,30 360,20 C500,9 610,28 740,18 C820,12 870,20 900,16 L900,110 L0,110 Z" fill="#dfe9f2"/>
+    <path d="M0,58 C160,48 320,64 480,54 C640,45 780,60 900,52 L900,110 L0,110 Z" fill="#cfdde9" opacity="0.8"/>
+    <path d="M0,86 C200,80 420,92 640,85 C780,81 850,88 900,84 L900,110 L0,110 Z" fill="#c2d3e2" opacity="0.6"/>
+  </svg>
+</header>
+
+<main>
+
+  <section class="dosc">
+    <div class="card">
+      <h2>Hoy en el yacimiento</h2>
+      <p class="fecha-hoy" id="hoy-fecha">—</p>
+      <p class="estado-big" id="hoy-estado"></p>
+      <p class="frase" id="hoy-frase"></p>
+      <div class="linea-dato" id="hoy-extra">
+        <div id="hoy-horario"></div>
+        <div id="hoy-franco"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>La pregunta del millón</h2>
+      <p class="pregunta" id="sab-pregunta">—</p>
+      <p class="veredicto" id="sab-veredicto"></p>
+      <p class="frase" id="sab-frase"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Próximos 8 días</h2>
+    <div class="tira" id="tira-dias"></div>
+  </section>
+
+  <section class="card">
+    <div class="cal-cab">
+      <p class="cal-titulo" id="cal-titulo">—</p>
+      <div class="cal-nav">
+        <button id="cal-prev" type="button" aria-label="Mes anterior">‹</button>
+        <button id="cal-next" type="button" aria-label="Mes siguiente">›</button>
+      </div>
+    </div>
+    <div class="cal-sem">
+      <span>lun</span><span>mar</span><span>mié</span><span>jue</span><span>vie</span><span>sáb</span><span>dom</span>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </section>
+
+  <section class="card">
+    <h2>Referencias</h2>
+    <div class="leyenda-grid">
+      <div class="ley-item"><span class="pill p-franco">franco</span><span><b>Franco</b> — libre. Día de vicio 🎮</span></div>
+      <div class="ley-item"><span class="pill p-dia">día</span><span><b>Turno día</b> — <span id="h-dia"></span></span></div>
+      <div class="ley-item"><span class="pill p-tarde">tarde</span><span><b>Turno tarde</b> — <span id="h-tarde"></span></span></div>
+      <div class="ley-item"><span class="pill p-noche">noche</span><span><b>Turno noche</b> — <span id="h-noche"></span></span></div>
+      <div class="ley-item"><span class="pill p-trabaja">campo</span><span><b>Trabaja</b> — turno sin confirmar</span></div>
+    </div>
+    <p class="ley-nota">
+      Pastilla <b>rellena con ✓</b> = lo confirmó él por WhatsApp · pastilla <b>punteada</b> = proyección del
+      diagrama <b>6×2</b> (6 días de trabajo + 2 de franco; el franco corre un día por ciclo). Horarios estimados.
+    </p>
+  </section>
+
+  <section class="card notas">
+    <p><b>📋 Cómo funciona:</b> la página proyecta el diagrama 6×2 a partir del último franco confirmado.
+    Por eso el franco va rotando: lun–mar, después mar–mié, después mié–jue… Y ya saben cómo es el petróleo:
+    el diagrama lo mueven seguido, así que ante la duda, pregúntenle antes de armar la sala.</p>
+    <p><b>🔧 Para actualizar:</b> cuando pase un parte nuevo, abran <b>index.html</b> en GitHub, toquen el lapicito
+    y editen el bloque <b>CONFIG</b> al principio del script (turnos confirmados y fecha del último parte).
+    Commit y listo.</p>
+    <p><b>🌬️ Pronóstico extendido para Comodoro:</b> viento. Siempre viento.</p>
+    <p class="firma">Hecho por los pibes del Discord — Comodoro Rivadavia, Chubut ⛽🎮</p>
+  </section>
+
+</main>
+<script>
+/* ==========================================================================
+   👉 EDITÁ ACÁ — CONFIG
+   Cada vez que él pase un parte nuevo por WhatsApp, actualizá esto y nada más.
+   ========================================================================== */
+const CONFIG = {
+  nombre: "el Petrolero",            // ← poné su nombre o apodo
+
+  ultimoParte: "2026-07-02",         // fecha del último mensaje con data
+
+  // Diagrama base: 6 días de trabajo + 2 de franco (ciclo de 8 días).
+  // anclaFranco = un día que ARRANCA un franco confirmado por él.
+  anclaFranco: "2026-07-06",
+  cicloDias: 8,
+  diasDeFranco: 2,
+
+  // Turnos confirmados (pisan la proyección del diagrama).
+  // Valores posibles: "dia" | "tarde" | "noche" | "franco" | "trabaja"
+  turnosConfirmados: {
+    "2026-07-03": "dia",
+    "2026-07-04": "tarde",
+    "2026-07-05": "tarde",
+    "2026-07-06": "franco",
+    "2026-07-07": "franco",
+    "2026-07-14": "franco",
+    "2026-07-15": "franco",
+  },
+
+  // Horarios estimados de cada turno (texto libre, es solo referencia)
+  horarios: {
+    dia:   "≈ 06 a 14 hs",
+    tarde: "≈ 14 a 22 hs",
+    noche: "≈ 22 a 06 hs",
+  },
+};
+/* ====================== FIN DE LA ZONA EDITABLE ========================= */
+
+
+/* ---------- utilidades de fecha (todo a las 12:00 para evitar líos) ---------- */
+const MS_DIA = 86400000;
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const SEM = ["lun","mar","mié","jue","vie","sáb","dom"]; // arranca lunes
+
+function aFecha(iso){ const [a,m,d] = iso.split("-").map(Number); return new Date(a, m-1, d, 12); }
+function clave(f){ return f.getFullYear() + "-" + String(f.getMonth()+1).padStart(2,"0") + "-" + String(f.getDate()).padStart(2,"0"); }
+function hoyFecha(){ const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate(), 12); }
+function sumarDias(f, n){ return new Date(f.getFullYear(), f.getMonth(), f.getDate() + n, 12); }
+function diaSem(f){ return (f.getDay() + 6) % 7; } // 0 = lunes
+function corto(f){ return SEM[diaSem(f)] + " " + f.getDate(); }
+
+const ANCLA = aFecha(CONFIG.anclaFranco);
+
+/* ---------- el corazón: ¿qué hace tal día? ---------- */
+function estadoDe(f){
+  const k = clave(f);
+  if (CONFIG.turnosConfirmados[k]) return { tipo: CONFIG.turnosConfirmados[k], confirmado: true };
+  const diff = Math.round((f - ANCLA) / MS_DIA);
+  const pos = ((diff % CONFIG.cicloDias) + CONFIG.cicloDias) % CONFIG.cicloDias;
+  return { tipo: pos < CONFIG.diasDeFranco ? "franco" : "trabaja", confirmado: false };
+}
+
+function proximoFranco(desde){
+  for (let i = 0; i < 120; i++){
+    const f = sumarDias(desde, i);
+    if (estadoDe(f).tipo === "franco"){
+      let fin = f;
+      while (estadoDe(sumarDias(fin, 1)).tipo === "franco"){
+        fin = sumarDias(fin, 1);
+        if (Math.round((fin - f) / MS_DIA) > 6) break;
+      }
+      return { inicio: f, fin, en: i };
+    }
+  }
+  return null;
+}
+
+/* ---------- textos ---------- */
+const META = {
+  franco:  { etiqueta: "FRANCO",       emoji: "🎮", clase: "franco",  pill: "franco" },
+  dia:     { etiqueta: "TURNO DÍA",    emoji: "☀️", clase: "dia",     pill: "día" },
+  tarde:   { etiqueta: "TURNO TARDE",  emoji: "🌇", clase: "tarde",   pill: "tarde" },
+  noche:   { etiqueta: "TURNO NOCHE",  emoji: "🌙", clase: "noche",   pill: "noche" },
+  trabaja: { etiqueta: "TRABAJA",      emoji: "⛏️", clase: "trabaja", pill: "campo" },
+};
+
+const FRASES_HOY = {
+  franco:  "Hoy no sube a la loma. Mate, sillón y disponibilidad total para el vicio.",
+  dia:     "Subió temprano al campo. A la tarde baja, y a la noche —si el sueño lo respeta— capaz se prende un rato.",
+  tarde:   "Lo tienen como loco hasta las 22. Baja de la loma de noche, hecho puré.",
+  noche:   "Trabaja de noche y duerme de día. Silencio absoluto en el Discord.",
+  trabaja: "Está de campaña, pero no pasó el turno. Pregúntenle antes de armar la sala.",
+};
+
+const VEREDICTOS = {
+  franco:  { v: "¡SÍ!",     f: "Franco total. Vayan cargando el Discord y estirando los dedos." },
+  dia:     { v: "PROBABLE", f: "Labura de día: a la noche ya está en el llano. Si no lo voltea el sueño, juega." },
+  tarde:   { v: "DIFÍCIL",  f: "Sale ≈ 22 hs y todavía tiene que bajar la loma. Si aparece, aparece tardísimo." },
+  noche:   { v: "NO",       f: "A esa hora está arriba, laburando. Ni lo tienten." },
+  trabaja: { v: "NI IDEA",  f: "Ese día trabaja, pero no confirmó turno. Tírenle un mensaje." },
+};
+
+/* ---------- render: encabezado ---------- */
+const $ = (s) => document.querySelector(s);
+const HOY = hoyFecha();
+
+$("#sub-nombre").textContent = CONFIG.nombre;
+const parte = aFecha(CONFIG.ultimoParte);
+$("#chip-parte").textContent = corto(parte) + "/" + (parte.getMonth() + 1);
+$("#h-dia").textContent = CONFIG.horarios.dia;
+$("#h-tarde").textContent = CONFIG.horarios.tarde;
+$("#h-noche").textContent = CONFIG.horarios.noche;
+
+/* ---------- render: HOY ---------- */
+function renderHoy(){
+  const est = estadoDe(HOY);
+  const m = META[est.tipo];
+  const fmt = new Intl.DateTimeFormat("es-AR", { weekday: "long", day: "numeric", month: "long" });
+
+  $("#hoy-fecha").textContent = "Hoy · " + fmt.format(HOY);
+  $("#hoy-estado").innerHTML = '<span class="em">' + m.emoji + '</span><span class="c-' + m.clase + '">' + m.etiqueta + "</span>";
+  $("#hoy-frase").textContent = FRASES_HOY[est.tipo];
+
+  const hor = $("#hoy-horario");
+  if (CONFIG.horarios[est.tipo]){
+    hor.innerHTML = "Horario estimado: <b>" + CONFIG.horarios[est.tipo] + "</b> · 🛻 arriba en Manantiales Behr";
+    hor.style.display = "";
+  } else {
+    hor.style.display = "none";
+  }
+
+  const pf = proximoFranco(HOY);
+  const lf = $("#hoy-franco");
+  if (!pf){ lf.style.display = "none"; return; }
+  if (pf.en === 0){
+    lf.innerHTML = "🎮 Franco hasta el <b>" + corto(pf.fin) + "</b>. Después, de vuelta a la loma.";
+  } else {
+    const dias = [];
+    let f = pf.inicio;
+    while (f <= pf.fin){ dias.push(corto(f)); f = sumarDias(f, 1); }
+    const cuando = pf.en === 1 ? "¡mañana!" : "faltan " + pf.en + " días";
+    lf.innerHTML = "Próximo franco: <b>" + dias.join(" y ") + " de " + MESES[pf.inicio.getMonth()] + "</b> · " + cuando;
+  }
+}
+
+/* ---------- render: ¿se juega el sábado? ---------- */
+function renderSabado(){
+  let s = HOY;
+  while (s.getDay() !== 6) s = sumarDias(s, 1);
+  const esHoy = clave(s) === clave(HOY);
+  const est = estadoDe(s);
+  const v = VEREDICTOS[est.tipo];
+  const m = META[est.tipo];
+
+  $("#sab-pregunta").innerHTML = esHoy
+    ? "¿Se juega <b>hoy</b> a la noche?"
+    : "¿Se juega el <b>sábado " + s.getDate() + "/" + (s.getMonth() + 1) + "</b> a la noche?";
+  $("#sab-veredicto").innerHTML = '<span class="c-' + m.clase + '">' + v.v + "</span>";
+  $("#sab-frase").textContent = v.f;
+}
+
+/* ---------- render: próximos 8 días ---------- */
+function renderTira(){
+  const cont = $("#tira-dias");
+  cont.innerHTML = "";
+  for (let i = 0; i < 8; i++){
+    const f = sumarDias(HOY, i);
+    const est = estadoDe(f);
+    const m = META[est.tipo];
+    const chip = document.createElement("div");
+    chip.className = "chip-dia" + (i === 0 ? " hoy-chip" : "");
+    chip.innerHTML =
+      '<div class="d">' + SEM[diaSem(f)] + "</div>" +
+      '<div class="n">' + f.getDate() + "</div>" +
+      '<span class="pill p-' + m.clase + (est.confirmado ? "" : " estim") + '">' + m.pill + "</span>";
+    cont.appendChild(chip);
+  }
+}
+
+/* ---------- render: calendario ---------- */
+const calEstado = { y: HOY.getFullYear(), m: HOY.getMonth() };
+
+function renderCalendario(){
+  $("#cal-titulo").textContent = MESES[calEstado.m] + " " + calEstado.y;
+  const grid = $("#cal-grid");
+  grid.innerHTML = "";
+
+  const primero = new Date(calEstado.y, calEstado.m, 1, 12);
+  const delante = diaSem(primero);
+  const diasMes = new Date(calEstado.y, calEstado.m + 1, 0).getDate();
+  const celdas = Math.ceil((delante + diasMes) / 7) * 7;
+  const arranque = sumarDias(primero, -delante);
+
+  for (let i = 0; i < celdas; i++){
+    const f = sumarDias(arranque, i);
+    const est = estadoDe(f);
+    const m = META[est.tipo];
+    const c = document.createElement("div");
+    c.className = "celda"
+      + (f.getMonth() !== calEstado.m ? " fuera" : "")
+      + (clave(f) === clave(HOY) ? " es-hoy" : "");
+    c.dataset.fecha = clave(f);
+    c.innerHTML =
+      '<span class="num">' + f.getDate() + "</span>" +
+      '<span class="pill p-' + m.clase + (est.confirmado ? "" : " estim") + '">'
+        + m.pill + (est.confirmado ? " ✓" : "") + "</span>";
+    grid.appendChild(c);
+  }
+}
+
+$("#cal-prev").addEventListener("click", () => {
+  calEstado.m--;
+  if (calEstado.m < 0){ calEstado.m = 11; calEstado.y--; }
+  renderCalendario();
+});
+$("#cal-next").addEventListener("click", () => {
+  calEstado.m++;
+  if (calEstado.m > 11){ calEstado.m = 0; calEstado.y++; }
+  renderCalendario();
+});
+
+/* ---------- nieve con viento del oeste ---------- */
+function nevar(){
+  const cont = document.getElementById("nieve");
+  const n = window.innerWidth < 600 ? 34 : 58;
+  for (let i = 0; i < n; i++){
+    const c = document.createElement("div");
+    c.className = "copo";
+    const t = 2 + Math.random() * 4;
+    const dur = 7 + Math.random() * 9;
+    c.style.cssText =
+      "left:" + (-8 + Math.random() * 106) + "vw;" +
+      "width:" + t + "px;height:" + t + "px;" +
+      "opacity:" + (0.25 + Math.random() * 0.55) + ";" +
+      "animation-duration:" + dur + "s;" +
+      "animation-delay:-" + (Math.random() * dur) + "s;";
+    if (t > 4.5) c.style.filter = "blur(1px)";
+    cont.appendChild(c);
+  }
+}
+
+/* ---------- ¡a la loma! ---------- */
+renderHoy();
+renderSabado();
+renderTira();
+renderCalendario();
+nevar();
+</script>
+</body>
+</html>
