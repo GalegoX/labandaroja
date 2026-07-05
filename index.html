@@ -470,14 +470,14 @@ document.getElementById("nota-parte").textContent = CONFIG.notaParte;
   }
   function tipoPozo(i){ return (hash(i) >>> 4) % 2; } // 0 = cigüeña, 1 = torre
 
-  // rampa opcional en el hueco entre pozo i y pozo i+1 (solo huecos grandes)
+  // rampa opcional en el hueco entre pozo i y pozo i+1 (solo huecos grandes).
+  // La orientación NO es fija: se dibuja/activa según hacia dónde va la Hilux.
   function rampaEnHueco(i){
     if (gap(i) < 85 * PX_POR_M) return null;           // solo si hay lugar
     if ((hash(i*7+3) % 100) >= 45) return null;        // ~45% de esos huecos
     const a = xPozo(i), b = xPozo(i+1);
     const x = (a + b) / 2 + ((hash(i*7+9) % 61) - 30);
-    const dir = (hash(i*7+5) & 1) ? 1 : -1;            // hacia dónde catapulta
-    return { x: x, dir: dir, i: i };
+    return { x: x, i: i };
   }
 
   const done = {};                // pozos ya leídos (i -> true)
@@ -653,50 +653,63 @@ document.getElementById("nota-parte").textContent = CONFIG.notaParte;
     ctx.lineTo(-47,-34);           // borde caja atrás
     ctx.lineTo(-11,-34);           // borde caja adelante
     ctx.lineTo(-9,-53);            // parante trasero cabina
-    ctx.lineTo(23,-53);            // techo
-    ctx.quadraticCurveTo(30,-53,40,-33); // parabrisas / capó
-    ctx.lineTo(48,-31);            // capó
-    ctx.lineTo(53,-25);            // frente
-    ctx.lineTo(53,-14);            // paragolpe delantero
+    ctx.lineTo(24,-53);            // techo
+    ctx.quadraticCurveTo(29,-53, 36,-35);  // parabrisas (más parado)
+    ctx.lineTo(51,-34);            // capó plano
+    ctx.lineTo(56,-32);            // quiebre del capó
+    ctx.lineTo(57,-18);            // frente vertical (parrilla)
+    ctx.lineTo(54,-14);            // baja al paragolpe
     ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = edge; ctx.lineWidth = 1.6; ctx.stroke();
 
     // zócalo / cobertura inferior
     ctx.fillStyle = low;
-    ctx.fillRect(-49,-16,98,3.5);
+    ctx.fillRect(-49,-16,100,3.5);
 
-    // separación caja/cabina
+    // separación caja/cabina + puerta + manija
     ctx.strokeStyle = edge; ctx.lineWidth = 1.4;
     ctx.beginPath(); ctx.moveTo(-10,-34); ctx.lineTo(-10,-14); ctx.stroke();
-    // línea de puerta
     ctx.beginPath(); ctx.moveTo(9,-33); ctx.lineTo(9,-15); ctx.stroke();
+    ctx.strokeStyle = "#9fb0c4"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(-2,-30); ctx.lineTo(4,-30); ctx.stroke();
 
     // ventanilla (cabina)
     ctx.fillStyle = glass;
     ctx.beginPath();
-    ctx.moveTo(-5,-50); ctx.lineTo(21,-50); ctx.lineTo(28,-35); ctx.lineTo(-5,-35);
+    ctx.moveTo(-5,-50); ctx.lineTo(21,-50); ctx.lineTo(27,-36); ctx.lineTo(-5,-36);
     ctx.closePath(); ctx.fill();
-    // parante central
     ctx.strokeStyle = body; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(9,-50); ctx.lineTo(9,-35); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(9,-50); ctx.lineTo(9,-36); ctx.stroke();
+
+    // ---- trompa Hilux: capó, óptica, parrilla y paragolpe ----
+    ctx.strokeStyle = "#dbe6f2"; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(37,-35); ctx.lineTo(51,-35); ctx.stroke();      // línea del capó
+    ctx.fillStyle = "#ffe9a6";                                                  // óptica rectangular alta
+    ctx.beginPath(); ctx.moveTo(50,-33); ctx.lineTo(56.5,-31.5); ctx.lineTo(56.5,-27.5); ctx.lineTo(50,-28.5); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "#c9b876"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = "#c3cfdd";                                                  // panel de parrilla
+    ctx.beginPath(); ctx.moveTo(51,-27); ctx.lineTo(56.8,-26); ctx.lineTo(57,-19); ctx.lineTo(52,-19); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "#8b9cb0"; ctx.lineWidth = 1;                             // tajos de la parrilla
+    ctx.beginPath(); ctx.moveTo(51.6,-24.6); ctx.lineTo(56.9,-23.7); ctx.moveTo(51.8,-22); ctx.lineTo(57,-21.2); ctx.stroke();
+    ctx.fillStyle = low;                                                        // paragolpe que sobresale
+    ctx.beginPath(); ctx.moveTo(54,-19); ctx.lineTo(61,-18); ctx.lineTo(61,-13); ctx.lineTo(54,-14); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = edge; ctx.lineWidth = 1; ctx.stroke();
+
+    // luz trasera
+    ctx.fillStyle = "#e0523a"; ctx.fillRect(-53,-27,3,6);
 
     // guardabarros (flares)
     ctx.strokeStyle = low; ctx.lineWidth = 4.5;
     ctx.beginPath(); ctx.arc(-30,-13,16,Math.PI*1.03,-0.03); ctx.stroke();
     ctx.beginPath(); ctx.arc(33,-13,16,Math.PI*1.03,-0.03); ctx.stroke();
 
-    // faro y luz trasera
-    ctx.fillStyle = "#ffe08a"; ctx.beginPath();
-    ctx.moveTo(49,-28); ctx.lineTo(53,-26); ctx.lineTo(53,-22); ctx.lineTo(49,-23); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = "#e0523a"; ctx.fillRect(-53,-27,3,5);
-
     ctx.restore();
 
     // haz de luz de noche
     if (P.head){
       ctx.save();
-      const gx = sx + dir*53;
+      const gx = sx + dir*58;
       const g = ctx.createLinearGradient(gx, 0, gx + dir*140, 0);
       g.addColorStop(0, "rgba(255,224,138,.30)");
       g.addColorStop(1, "rgba(255,224,138,0)");
@@ -780,9 +793,8 @@ document.getElementById("nota-parte").textContent = CONFIG.notaParte;
         const r = rampaEnHueco(i);
         if (!r) continue;
         const cruzo = (prevX - r.x) * (jugador.x - r.x) <= 0 && prevX !== jugador.x;
-        const aFavor = (jugador.x - prevX) * r.dir > 0;   // va hacia donde catapulta
-        if (cruzo && aFavor && Math.abs(jugador.v) > 40){
-          salto.activo = true; salto.t = 0; salto.dir = r.dir;
+        if (cruzo && Math.abs(jugador.v) > 40){
+          salto.activo = true; salto.t = 0; salto.dir = (jugador.x > prevX ? 1 : -1);
           playSalto();
           break;
         }
@@ -913,7 +925,7 @@ document.getElementById("nota-parte").textContent = CONFIG.notaParte;
       if (!r) continue;
       const sx = r.x - camX;
       if (sx < -60 || sx > W+60) continue;
-      drawRampa(sx, baseChata, r.dir);
+      drawRampa(sx, baseChata, jugador.dir);
     }
 
     // Hilux (con salto si corresponde)
