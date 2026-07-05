@@ -597,21 +597,29 @@ document.getElementById("nota-parte").textContent = CONFIG.notaParte;
     ctx.fillText("tomando lectura… " + Math.round(pct*100) + "%", sx, y-8);
   }
 
-  function drawRampa(sx, base, d){
-    // pequeña loma-rampa; sube "a favor" de d (dibujada para d=+1)
+  function drawLoma(sx, base){
+    // lomadita simétrica: curva de los dos lados, se salta venga de donde venga
+    const hw = 40, h = 26;                 // medio ancho y alto
     ctx.save();
     ctx.translate(sx, base);
-    ctx.scale(d, 1);
     ctx.fillStyle = P.ground; ctx.strokeStyle = P.shade; ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(-28, 1);
-    ctx.quadraticCurveTo(-6, -21, 15, -19);
-    ctx.lineTo(20, 1);
+    ctx.moveTo(-hw, 1);
+    ctx.bezierCurveTo(-hw*0.52, -h, hw*0.52, -h, hw, 1);
     ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = P.shade; ctx.globalAlpha = .35;
+    // sombreado del lado derecho (da volumen)
+    ctx.fillStyle = P.shade; ctx.globalAlpha = .28;
     ctx.beginPath();
-    ctx.moveTo(-28,1); ctx.quadraticCurveTo(-6,-21,15,-19); ctx.lineTo(15,1); ctx.closePath(); ctx.fill();
+    ctx.moveTo(2, -h+4);
+    ctx.bezierCurveTo(hw*0.5, -h, hw*0.5, -h, hw, 1);
+    ctx.lineTo(2, 1); ctx.closePath(); ctx.fill();
     ctx.globalAlpha = 1;
+    // brillito de nieve en la cresta
+    ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-hw*0.42, -h*0.82);
+    ctx.bezierCurveTo(-hw*0.12, -h*1.02, hw*0.12, -h*1.02, hw*0.42, -h*0.82);
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -924,8 +932,8 @@ document.getElementById("nota-parte").textContent = CONFIG.notaParte;
       const r = rampaEnHueco(i);
       if (!r) continue;
       const sx = r.x - camX;
-      if (sx < -60 || sx > W+60) continue;
-      drawRampa(sx, baseChata, jugador.dir);
+      if (sx < -70 || sx > W+70) continue;
+      drawLoma(sx, baseChata);
     }
 
     // Hilux (con salto si corresponde)
